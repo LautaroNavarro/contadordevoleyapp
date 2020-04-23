@@ -1,0 +1,19 @@
+version: "3"
+services:
+    web-client:
+        stdin_open: true
+        build:
+            dockerfile: "Dockerfile.dev"
+            context: "./web-client"
+        volumes:
+            - "/app/node_modules"
+            - "./web-client:/app"
+    nginx:
+        restart: always
+        build:
+            dockerfile: "Dockerfile.dev"
+            context: "./nginx"
+        ports:
+            - '8000:80'
+        depends_on:
+            - web-client
