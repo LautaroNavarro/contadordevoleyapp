@@ -15,5 +15,3 @@ services:
             context: "./nginx"
         ports:
             - '8000:80'
-        depends_on:
-            - web-client

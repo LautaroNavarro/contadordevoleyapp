@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-client-deployment.yaml
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      component: web-client
+  template:
+    metadata:
+      labels:
+        component: web-client
+    spec:
+      containers:
+        - name: web-client
+          image: lautaronavarro/contadordevoleyapp-web-client
+          ports:
+            - containerPort: 3000
