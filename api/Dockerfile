@@ -1,0 +1,17 @@
+FROM python:3.7-alpine
+
+WORKDIR /app
+
+COPY requirements.txt ./
+
+RUN pip install -r requirements.txt
+
+COPY . .
+
+ENV DEBUG=False
+
+RUN chmod +x /app/migrations.sh
+
+RUN source /app/migrations.sh
+
+CMD ["python3",  "manage.py", "runserver", "0.0.0.0:8000"]

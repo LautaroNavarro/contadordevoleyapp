@@ -12,7 +12,14 @@ build:
         '**/*.js': .
         '**/*.css': .
         '**/*.html': .
+    - image: lautaronavarro/contadordevoleyapp-api
+      context: api
+      docker:
+        dockerfile: Dockerfile.dev
+      sync:
+        '**/*.py': .
 deploy:
   kubectl:
     manifests:
       - k8s/web-client-deployment.yaml
+      - k8s/api-deployment.yaml
