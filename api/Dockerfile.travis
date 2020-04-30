@@ -16,6 +16,6 @@ COPY . .
 
 ENV DEBUG=True
 
-ENV DJANGO_SETTINGS_MODULE=api.settings
+ENV DJANGO_SETTINGS_MODULE=api.testing_settings
 
 CMD ["python3",  "manage.py", "runserver", "0.0.0.0:8000"]

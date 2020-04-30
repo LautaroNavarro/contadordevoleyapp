@@ -18,6 +18,7 @@ build:
         dockerfile: Dockerfile.dev
       sync:
         '**/*.py': .
+        'pytest.ini': .
 deploy:
   kubectl:
     manifests:
