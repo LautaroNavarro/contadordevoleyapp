@@ -1,7 +1,7 @@
 import mock
 
 
-def get_fake_jwt_request(user=None, content_type='application/json', body=b'', get_params={}, files=[]):
+def get_fake_request(user=None, content_type='application/json', body=b'', get_params={}, files=[]):
     request = mock.Mock()
     request.content_type = content_type
     request.body = body

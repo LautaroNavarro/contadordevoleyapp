@@ -1,9 +1,18 @@
 from django.db import models
 from match.helpers.date_helpers import get_current_utc_datetime
 from match.models.team import Team
+from enum import IntEnum
 
 
 class Match(models.Model):
+
+    class Status(IntEnum):
+        LIVE = 0
+        ARCHIVED = 1
+
+    class GameStatus(IntEnum):
+        PLAYING = 0
+        FINISHED = 1
 
     status = models.IntegerField(null=False, db_index=True)
     access_code = models.CharField(max_length=255, null=False, db_index=True)
@@ -26,26 +35,27 @@ class Match(models.Model):
     @property
     def team_one(self):
         # TODO: Implement query to get team one
-        return False
+        return None
 
     @property
     def team_two(self):
         # TODO: Implement query to get team two
-        return False
+        return None
 
     @property
     def winner_team(self):
         # TODO: Implement query to get winner team
-        return False
+        return None
 
     @property
     def serialized(self):
         return {
+            'id': self.id,
             'sets_number': self.sets_number,
             'access_code': self.access_code,
             'status': self.status,
             'game_status': self.game_status,
-            'sets_points_number': self.sets_points_number,
+            'set_points_number': self.set_points_number,
             'points_difference': self.points_difference,
             'tie_break_points': self.tie_break_points,
             'team_one': self.team_one.serialized if self.team_one else None,

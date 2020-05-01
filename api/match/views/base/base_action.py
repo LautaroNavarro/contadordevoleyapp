@@ -9,13 +9,15 @@ from match.views.base.mappers import json_error_to_http_error_mapper
 from httperrors import BadRequestError
 
 
-class BaseView():
+class BaseAction():
 
     content_type = None
 
     schema = None
 
     required_body = False
+
+    common = {}
 
     @json_error_handler
     @request_error_handler

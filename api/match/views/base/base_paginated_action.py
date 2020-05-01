@@ -1,4 +1,4 @@
-from match.views.base.base_view import BaseView
+from match.views.base.base_action import BaseAction
 from match.constants.error_codes import INVALID_PAGE
 from httperrors import BadRequestError
 from match.views.base.handlers import (
@@ -7,7 +7,7 @@ from match.views.base.handlers import (
 )
 
 
-class PaginatedBaseView(BaseView):
+class PaginatedBaseAction(BaseAction):
 
     def validate(self, request, *args, **kwargs):
         super().validate(request, *args, **kwargs)
