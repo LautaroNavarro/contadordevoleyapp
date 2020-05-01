@@ -58,7 +58,7 @@ class Match(models.Model):
             'set_points_number': self.set_points_number,
             'points_difference': self.points_difference,
             'tie_break_points': self.tie_break_points,
-            'team_one': self.team_one.serialized if self.team_one else None,
-            'team_two': self.team_two.serialized if self.team_two else None,
+            'sets': [_set.serialized for _set in self.set_set.all()] if self.id else [],
+            'teams': [team.serialized for team in self.teams] if self.id else [],
             'winner_team': self.winner_team.serialized if self.winner_team else None,
         }

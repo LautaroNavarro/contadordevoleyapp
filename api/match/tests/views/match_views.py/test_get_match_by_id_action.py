@@ -43,8 +43,8 @@ class TestGetMatchByIdActionRun:
                 'set_points_number': match.set_points_number,
                 'points_difference': match.points_difference,
                 'tie_break_points': match.tie_break_points,
-                'team_one': match.team_one,
-                'team_two': match.team_two,
+                'teams': [],
+                'sets': [],
                 'winner_team': match.winner_team,
             }
         }
