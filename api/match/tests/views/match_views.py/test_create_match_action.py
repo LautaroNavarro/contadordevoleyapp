@@ -1,0 +1,86 @@
+import pytest
+import mock
+import copy
+import json
+from httperrors import BadRequestError
+from match.views.match_actions.create_match_action import CreateMatchAction
+from match.helpers.testing_helpers import get_fake_request
+from match.constants.error_codes import NOT_A_JSON_BODY
+from match.models.match import Match
+from match.models.team import Team
+
+
+valid_schema = {
+    'sets_number': 5,
+    'set_points_number': 25,
+    'points_difference': 2,
+    'tie_break_points': 15,
+    'teams': [
+        {
+            'name': 'Team one',
+            'color': '#ff00ff',
+        },
+        {
+            'name': 'Team two',
+            'color': '#ff0000',
+        }
+    ]
+}
+
+
+@pytest.mark.django_db
+class TestCreateMatchActionValidate:
+
+    def test_it_raises_bad_request_when_not_odd_sets_number(self):
+        action = CreateMatchAction()
+        schema = copy.deepcopy(valid_schema)
+        schema['sets_number'] = 4
+        request = get_fake_request(body=json.dumps(schema))
+        with pytest.raises(BadRequestError) as e:
+            action.validate(request)
+        assert e.value.error_code == NOT_A_JSON_BODY
+
+    def test_it_does_not_raise_bad_request_when_odd_sets_number(self):
+        action = CreateMatchAction()
+        request = get_fake_request(body=json.dumps(valid_schema))
+        with pytest.raises(BadRequestError) as e:
+            action.validate(request)
+        assert e.value.error_code == NOT_A_JSON_BODY
+
+
+@pytest.mark.django_db
+class TestCreateMatchActionRun:
+
+    def test_it_create_requested_match_and_teams(self):
+        action = CreateMatchAction()
+        action.common['body'] = copy.deepcopy(valid_schema)
+        request = get_fake_request()
+        action.run(request)
+        created_matches = Match.objects.all()
+        created_teams = Team.objects.filter(match=created_matches[0]).order_by('id')
+        assert created_teams.count() == 2
+        assert created_matches.count() == 1
+        assert created_matches[0].sets_number == valid_schema['sets_number']
+        assert created_matches[0].set_points_number == valid_schema['set_points_number']
+        assert created_matches[0].points_difference == valid_schema['points_difference']
+        assert created_matches[0].tie_break_points == valid_schema['tie_break_points']
+        assert created_teams[0].name == valid_schema['teams'][0]['name']
+        assert created_teams[0].color == valid_schema['teams'][0]['color']
+        assert created_teams[1].name == valid_schema['teams'][1]['name']
+        assert created_teams[1].color == valid_schema['teams'][1]['color']
+
+    @mock.patch('match.models.match.Match.generate_access_code')
+    def test_atomic_transaction_not_create_partial_match(self, generate_access_code_mock):
+        generate_access_code_mock.side_effect = Exception
+
+        action = CreateMatchAction()
+        action.common['body'] = copy.deepcopy(valid_schema)
+        request = get_fake_request()
+        with pytest.raises(Exception):
+            action.run(request)
+
+        created_matches = Match.objects.all()
+        created_teams = Team.objects.all()
+
+        assert created_teams.count() == 0
+        assert created_matches.count() == 0

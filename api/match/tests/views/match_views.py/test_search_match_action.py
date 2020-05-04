@@ -22,14 +22,14 @@ class TestSearchMatchActionValidate:
         request = get_fake_request(get_params={'access_code': '123AS'})
         with pytest.raises(NotFoundError) as e:
             action.validate(request)
-            assert e.value.error_code == INVALID_ACCESS_CODE
+        assert e.value.error_code == INVALID_ACCESS_CODE
 
     def test_it_raises_bad_request_when_access_code_not_provided(self):
         action = SearchMatchAction()
         request = get_fake_request()
         with pytest.raises(BadRequestError) as e:
             action.validate(request)
-            assert e.value.error_code == REQUIRED_QUERY_PARAM
+        assert e.value.error_code == REQUIRED_QUERY_PARAM
 
     def test_it_raises_not_found_when_match_is_not_live(self):
         action = SearchMatchAction()
@@ -37,7 +37,7 @@ class TestSearchMatchActionValidate:
         request = get_fake_request(get_params={'access_code': match.access_code})
         with pytest.raises(NotFoundError) as e:
             action.validate(request, match_id=match.id)
-            assert e.value.error_code == INVALID_ACCESS_CODE
+        assert e.value.error_code == INVALID_ACCESS_CODE
 
     def test_it_does_not_raise_error_when_valid_id_and_write_match_in_common(self):
         action = SearchMatchAction()

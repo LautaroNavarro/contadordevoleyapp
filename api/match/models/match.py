@@ -1,3 +1,5 @@
+import string
+import random
 from django.db import models
 from match.helpers.date_helpers import get_current_utc_datetime
 from match.models.team import Team
@@ -47,6 +49,10 @@ class Match(models.Model):
         # TODO: Implement query to get winner team
         return None
 
+    @staticmethod
+    def generate_access_code(size=7, chars=string.ascii_uppercase + string.digits):
+        return ''.join(random.choice(chars) for _ in range(size))
+
     @property
     def serialized(self):
         return {
@@ -59,6 +65,6 @@ class Match(models.Model):
             'points_difference': self.points_difference,
             'tie_break_points': self.tie_break_points,
             'sets': [_set.serialized for _set in self.set_set.all()] if self.id else [],
-            'teams': [team.serialized for team in self.teams] if self.id else [],
+            'teams': [team.serialized for team in Team.objects.filter(match=self)] if self.id else [],
             'winner_team': self.winner_team.serialized if self.winner_team else None,
         }

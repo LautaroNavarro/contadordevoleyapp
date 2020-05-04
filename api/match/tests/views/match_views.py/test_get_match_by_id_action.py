@@ -15,7 +15,7 @@ class TestGetMatchByIdActionValidate:
         request = get_fake_request()
         with pytest.raises(NotFoundError) as e:
             action.validate(request, match_id=1)
-            assert e.value.error_code == INVALID_MATCH_ID
+        assert e.value.error_code == INVALID_MATCH_ID
 
     def test_it_does_not_raise_error_when_valid_id_and_write_match_in_common(self):
         action = GetMatchByIdAction()
