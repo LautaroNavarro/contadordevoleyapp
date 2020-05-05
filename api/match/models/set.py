@@ -6,8 +6,8 @@ from enum import IntEnum
 class Set(models.Model):
 
     class GameStatus(IntEnum):
-        PLAYING = 1
-        FINISHED = 2
+        PLAYING = 0
+        FINISHED = 1
 
     game_status = models.IntegerField(null=False, db_index=True)
     team_one_points = models.IntegerField(null=False)

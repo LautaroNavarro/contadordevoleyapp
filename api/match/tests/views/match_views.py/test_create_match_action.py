@@ -61,7 +61,7 @@ class TestCreateMatchActionRun:
         created_sets = Set.objects.filter(match_id=created_matches[0].id)
 
         assert len(response['match']['sets']) == 1
-        assert response['match']['sets'][0]['game_status'] == 1
+        assert response['match']['sets'][0]['game_status'] == 0
         assert response['match']['sets'][0]['team_one_points'] == 0
         assert response['match']['sets'][0]['team_two_points'] == 0
         assert response['match']['sets'][0]['match_id'] == created_matches[0].id

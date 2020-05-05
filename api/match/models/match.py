@@ -6,6 +6,7 @@ from match.models.team import Team
 from match.models.set import Set
 from enum import IntEnum
 from math import floor
+from django.db import transaction
 
 
 class Match(models.Model):
@@ -38,17 +39,33 @@ class Match(models.Model):
 
     @property
     def team_one(self):
-        # TODO: Implement query to get team one
-        return None
+        return Team.objects.filter(match=self).order_by('id').first()
 
     @property
     def team_two(self):
-        # TODO: Implement query to get team two
-        return None
+        return Team.objects.filter(match=self).order_by('-id').first()
+
+    def get_counters(self):
+        sets = self.set_set.all()
+        team_one_sets_counter = 0
+        team_two_sets_counter = 0
+        for _set in sets:
+            if _set.game_status == Set.GameStatus.FINISHED.value:
+                if _set.team_one_points > _set.team_two_points:
+                    team_one_sets_counter += 1
+                else:
+                    team_two_sets_counter += 1
+        return team_one_sets_counter, team_two_sets_counter
 
     @property
     def winner_team(self):
-        # TODO: Implement query to get winner team
+        team_one_sets_counter, team_two_sets_counter = self.get_counters()
+        if (
+            team_one_sets_counter >= self.get_minimum_sets_to_play()
+        ):
+            return self.team_one
+        elif team_two_sets_counter >= self.get_minimum_sets_to_play():
+            return self.team_two
         return None
 
     @staticmethod
@@ -67,6 +84,81 @@ class Match(models.Model):
             set_number=1,
             is_tie_break=False,
         )
+
+    def get_current_set(self):
+        return Set.objects.get(
+            match=self,
+            game_status=Set.GameStatus.PLAYING.value,
+        )
+
+    def add_team_counter(self, team):
+        current_set = self.get_current_set()
+
+        setattr(current_set, '{}_points'.format(team), getattr(current_set, '{}_points'.format(team)) + 1)
+
+        with transaction.atomic():
+            current_set.save()
+            self.update_game_status()
+
+    def get_target_points(self, is_tie_break):
+        if is_tie_break:
+            return self.tie_break_points
+        return self.set_points_number
+
+    def new_set_should_be_tie_break(self):
+        team_one_sets_counter, team_two_sets_counter = self.get_counters()
+        return (
+            (team_one_sets_counter == team_two_sets_counter)
+            and (team_one_sets_counter + team_two_sets_counter) == (self.sets_number - 1)
+        )
+
+    def get_played_set_count(self):
+        return self.set_set.all().count()
+
+    def update_game_status(self):
+        create_new_set = False
+        for _set in self.set_set.all():
+            if _set.game_status == Set.GameStatus.PLAYING.value:
+                if (
+                    (
+                        _set.team_one_points >= self.get_target_points(_set.is_tie_break) and (
+                            _set.team_one_points - _set.team_two_points
+                        ) >= self.points_difference
+                    )
+                    or (
+                        _set.team_two_points >= self.get_target_points(_set.is_tie_break) and (
+                            _set.team_two_points - _set.team_one_points
+                        ) >= self.points_difference
+                    )
+                ):
+                    _set.game_status = Set.GameStatus.FINISHED.value
+                    _set.save()
+                    create_new_set = True
+
+        if self.is_match_game_status_finished():
+            self.game_status = self.GameStatus.FINISHED.value
+            self.save()
+        elif create_new_set:
+            Set.objects.create(
+                game_status=Set.GameStatus.PLAYING.value,
+                team_one_points=0,
+                team_two_points=0,
+                match=self,
+                set_number=self.get_played_set_count() + 1,
+                is_tie_break=self.new_set_should_be_tie_break()
+            )
+
+    def is_match_game_status_finished(self):
+        team_one_sets_counter, team_two_sets_counter = self.get_counters()
+        if (
+            team_one_sets_counter >= self.get_minimum_sets_to_play()
+            or team_two_sets_counter >= self.get_minimum_sets_to_play()
+        ):
+            return True
+        return False
+
+    def is_operable_match(self):
+        return self.game_status != self.GameStatus.FINISHED.value
 
     @property
     def serialized(self):
