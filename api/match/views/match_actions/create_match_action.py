@@ -36,4 +36,5 @@ class CreateMatchAction(BaseAction):
             self.common['body']['access_code'] = Match.generate_access_code()
             match = Match.objects.create(**self.common['body'])
             match.teams.add(*teams)
+            match.init_sets()
         return JsonResponse({'match': match.serialized})

@@ -3,7 +3,9 @@ import random
 from django.db import models
 from match.helpers.date_helpers import get_current_utc_datetime
 from match.models.team import Team
+from match.models.set import Set
 from enum import IntEnum
+from math import floor
 
 
 class Match(models.Model):
@@ -52,6 +54,19 @@ class Match(models.Model):
     @staticmethod
     def generate_access_code(size=7, chars=string.ascii_uppercase + string.digits):
         return ''.join(random.choice(chars) for _ in range(size))
+
+    def get_minimum_sets_to_play(self):
+        return floor(self.sets_number / 2) + 1
+
+    def init_sets(self):
+        Set.objects.create(
+            game_status=Set.GameStatus.PLAYING.value,
+            team_one_points=0,
+            team_two_points=0,
+            match=self,
+            set_number=1,
+            is_tie_break=False,
+        )
 
     @property
     def serialized(self):

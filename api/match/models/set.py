@@ -1,14 +1,18 @@
 from django.db import models
 from match.helpers.date_helpers import get_current_utc_datetime
-from match.models.match import Match
+from enum import IntEnum
 
 
 class Set(models.Model):
 
-    status = models.IntegerField(null=False, db_index=True)
+    class GameStatus(IntEnum):
+        PLAYING = 1
+        FINISHED = 2
+
+    game_status = models.IntegerField(null=False, db_index=True)
     team_one_points = models.IntegerField(null=False)
     team_two_points = models.IntegerField(null=False)
-    match = models.ForeignKey(Match, on_delete=models.CASCADE, null=False)
+    match = models.ForeignKey('Match', on_delete=models.CASCADE, null=False)
     set_number = models.IntegerField(null=False)
     is_tie_break = models.BooleanField(default=False)
 
@@ -18,9 +22,10 @@ class Set(models.Model):
     @property
     def serialized(self):
         return {
-            'status': self.status,
-            'team_one_points': self.game_status,
-            'team_two_points': self.sets_points_number,
+            'id': self.id,
+            'game_status': self.game_status,
+            'team_one_points': self.team_one_points,
+            'team_two_points': self.team_two_points,
             'match_id': self.match_id,
             'set_number': self.set_number,
             'is_tie_break': self.is_tie_break,
