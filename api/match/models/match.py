@@ -86,10 +86,10 @@ class Match(models.Model):
         )
 
     def get_current_set(self):
-        return Set.objects.get(
+        return Set.objects.filter(
             match=self,
             game_status=Set.GameStatus.PLAYING.value,
-        )
+        ).first()
 
     def add_team_counter(self, team):
         current_set = self.get_current_set()
@@ -99,6 +99,11 @@ class Match(models.Model):
         with transaction.atomic():
             current_set.save()
             self.update_game_status()
+
+    def sub_team_counter(self, team):
+        current_set = self.get_current_set()
+        setattr(current_set, '{}_points'.format(team), getattr(current_set, '{}_points'.format(team)) - 1)
+        current_set.save()
 
     def get_target_points(self, is_tie_break):
         if is_tie_break:
@@ -155,6 +160,13 @@ class Match(models.Model):
             or team_two_sets_counter >= self.get_minimum_sets_to_play()
         ):
             return True
+        return False
+
+    def can_substract_points(self, team):
+        current_set = self.get_current_set()
+        if current_set:
+            team_points = getattr(current_set, '{}_points'.format(team))
+            return team_points > 0
         return False
 
     def is_operable_match(self):

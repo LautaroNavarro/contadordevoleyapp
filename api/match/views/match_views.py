@@ -1,7 +1,8 @@
 from django.views import View
 from match.views.match_actions.get_match_by_id import GetMatchByIdAction
 from match.views.match_actions.search_match_action import SearchMatchAction
-from match.views.match_actions.match_controls_action import MatchControlsAction
+from match.views.match_actions.add_points_action import AddPointsAction
+from match.views.match_actions.sub_points_action import SubPointsAction
 
 
 class MatchByIdView(View):
@@ -11,10 +12,17 @@ class MatchByIdView(View):
         return action(request, *args, **kwargs)
 
 
-class MatchControls(View):
+class AddPointsView(View):
 
     def post(self, request, *args, **kwargs):
-        action = MatchControlsAction()
+        action = AddPointsAction()
+        return action(request, *args, **kwargs)
+
+
+class SubPointsView(View):
+
+    def post(self, request, *args, **kwargs):
+        action = SubPointsAction()
         return action(request, *args, **kwargs)
 
 

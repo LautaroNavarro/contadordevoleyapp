@@ -4,7 +4,7 @@ from httperrors import (
     NotFoundError,
     BadRequestError,
 )
-from match.views.match_actions.match_controls_action import MatchControlsAction
+from match.views.match_actions.add_points_action import AddPointsAction
 from match.helpers.testing_helpers import get_fake_request
 from match.constants.error_codes import (
     INVALID_MATCH_ID,
@@ -14,22 +14,21 @@ from match.constants.error_codes import (
 from match.tests.factories.match_factory import MatchFactory
 from match.tests.factories.team_factory import TeamFactory
 from match.models.match import Match
-from match.models.team import Team
 from match.models.set import Set
 
 
 @pytest.mark.django_db
-class TestMatchControlsActionValidate:
+class TestAddPointsActionValidate:
 
     def test_it_raises_not_found_when_invalid_id(self):
-        action = MatchControlsAction()
+        action = AddPointsAction()
         request = get_fake_request()
         with pytest.raises(NotFoundError) as e:
             action.validate(request, match_id=1, team='team_one')
         assert e.value.error_code == INVALID_MATCH_ID
 
     def test_it_raises_invalid_when_invalid_team(self):
-        action = MatchControlsAction()
+        action = AddPointsAction()
         request = get_fake_request()
         match = MatchFactory()
         with pytest.raises(BadRequestError) as e:
@@ -37,7 +36,7 @@ class TestMatchControlsActionValidate:
         assert e.value.error_code == INVALID_TEAM_SELECTION
 
     def test_it_raises_invalid_when_invalid_game_status(self):
-        action = MatchControlsAction()
+        action = AddPointsAction()
         request = get_fake_request()
         match = MatchFactory(game_status=Match.GameStatus.FINISHED.value)
         with pytest.raises(BadRequestError) as e:
@@ -45,16 +44,17 @@ class TestMatchControlsActionValidate:
         assert e.value.error_code == INVALID_MATCH_STATUS
 
     def test_it_does_not_raise_invalid_when_valid_request(self):
-        action = MatchControlsAction()
+        action = AddPointsAction()
         request = get_fake_request()
         match = MatchFactory()
         action.validate(request, match_id=match.id, team='team_one')
 
+
 @pytest.mark.django_db
-class TestMatchControlsActionRun:
+class TestAddPointsActionRun:
 
     def test_it_add_one_to_the_correct_team_response_and_db(self):
-        action = MatchControlsAction()
+        action = AddPointsAction()
         request = get_fake_request()
         match = MatchFactory()
         match.teams.add(*[TeamFactory() for i in range(2)])
@@ -94,7 +94,7 @@ class TestMatchControlsActionRun:
         assert sets[0].team_two_points == 0
 
     def test_it_add_one_to_the_team_two_response_and_db(self):
-        action = MatchControlsAction()
+        action = AddPointsAction()
         request = get_fake_request()
         match = MatchFactory()
         match.teams.add(*[TeamFactory() for i in range(2)])
@@ -132,18 +132,3 @@ class TestMatchControlsActionRun:
         assert sets[0].game_status == Set.GameStatus.PLAYING.value
         assert sets[0].team_one_points == 0
         assert sets[0].team_two_points == 1
-
-    # def test_it_add_one_to_the_correct_team_and_create_new_set_when_game_is_not_finished(self):
-    #     action = MatchControlsAction()
-    #     request = get_fake_request()
-    #     match = MatchFactory()
-    #     match.teams.add(*[TeamFactory() for i in range(2)])
-    #     match.init_sets()
-    #     sets = Set.objects.filter(match_id=match.id)
-    #     sets[0].team_one_points == 24
-    #     sets[0].save()
-    #     action.common['match'] = match
-    #     action.run(request=request, match_id=match.id, team='team_one')
-    #     sets = Set.objects.filter(match_id=match.id)
-    #     assert len(sets) == 2
-

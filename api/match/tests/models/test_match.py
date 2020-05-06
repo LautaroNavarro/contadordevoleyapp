@@ -289,3 +289,32 @@ class TestGameLogic:
         assert Set.objects.get(id=_set.id).game_status == Set.GameStatus.FINISHED.value
         assert match.game_status == Match.GameStatus.FINISHED.value
         assert Set.objects.filter(match=match).count() == 5
+
+    @pytest.mark.django_db
+    def test_can_substract_points_no_points_playing_set_returns_false(self):
+        match = MatchFactory(sets_number=5)
+        SetFactory(match=match)
+        assert match.can_substract_points('team_one') is False
+
+    @pytest.mark.django_db
+    def test_can_substract_points_no_set_returns_false(self):
+        match = MatchFactory(sets_number=5)
+        assert match.can_substract_points('team_one') is False
+
+    @pytest.mark.django_db
+    def test_can_substract_points_finished_sets_returns_false(self):
+        match = MatchFactory(sets_number=5)
+        SetFactory(match=match, game_status=Set.GameStatus.FINISHED.value)
+        assert match.can_substract_points('team_one') is False
+
+    @pytest.mark.django_db
+    def test_can_substract_points_playing_set_return_true(self):
+        match = MatchFactory(sets_number=5)
+        SetFactory(match=match, game_status=Set.GameStatus.PLAYING.value, team_one_points=1)
+        assert match.can_substract_points('team_one') is True
+
+    @pytest.mark.django_db
+    def test_can_substract_points_playing_set_return_false_team_two(self):
+        match = MatchFactory(sets_number=5)
+        SetFactory(match=match, game_status=Set.GameStatus.PLAYING.value, team_one_points=1)
+        assert match.can_substract_points('team_two') is False

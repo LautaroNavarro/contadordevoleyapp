@@ -10,18 +10,20 @@ from match.constants.error_codes import (
     INVALID_MATCH_ID,
     INVALID_TEAM_SELECTION,
     INVALID_MATCH_STATUS,
+    INVALID_SET_STATUS,
 )
 from match.constants.error_messages import (
     RESOURCE_NOT_FOUND_MESSAGE,
     TEAM_NOT_ONE_OF,
     MATCH_IS_FINISHED,
+    CAN_NOT_SUBSCRACT_POINTS,
 )
 from match.constants.entities import MATCH
 
 
-class MatchControlsAction(BaseAction):
+class SubPointsAction(BaseAction):
     """
-    This action handle the updates for the counter of the teams
+    This action handle substracting points for the counter of a team
     """
     required_body = False
 
@@ -45,10 +47,15 @@ class MatchControlsAction(BaseAction):
                 error_message=TEAM_NOT_ONE_OF.format(','.join(self.VALID_TEAMS)),
                 error_code=INVALID_TEAM_SELECTION,
             )
+        if not match.can_substract_points(team):
+            raise BadRequestError(
+                error_message=CAN_NOT_SUBSCRACT_POINTS,
+                error_code=INVALID_SET_STATUS,
+            )
         self.common = {
             'match': match
         }
 
     def run(self, request, match_id, team, *args, **kwargs):
-        self.common['match'].add_team_counter(team)
+        self.common['match'].sub_team_counter(team)
         return JsonResponse({'match': self.common.get('match').serialized if self.common.get('match') else None})
