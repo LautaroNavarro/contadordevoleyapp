@@ -63,6 +63,15 @@ class MatchControlView extends Component {
         }
     }
 
+    getCurrentSet() {
+        for (let i = 0; i < this.state.sets.length; i++) {
+            // 0 => PLAYING
+            if (this.state.sets[i].game_status == 0) {
+                return this.state.sets[i];
+            }
+        }
+    }
+
     getRenderedSets (team) {
         let renderedWon = team === 'team_one' ? this.state.teams[0].sets_won : this.state.teams[1].sets_won
         let renderedWonCount = 0;
@@ -107,7 +116,7 @@ class MatchControlView extends Component {
                                 }
                             </div>
                             <div className="flex-fill rounded" style={ {"backgroundColor": this.state.teams[0].color } }>
-                                    <h1 className="mainTeamNumber">{this.state.sets.length != 0 ? this.state.sets[this.state.sets.length - 1].team_one_points : 0}</h1>
+                                    <h1 className="mainTeamNumber">{this.state.sets.length != 0 ? this.getCurrentSet().team_one_points : 0}</h1>
                             </div>
                             <div className="d-flex flex-row">
                                 <div className="flex-fill pr-1">
@@ -131,7 +140,7 @@ class MatchControlView extends Component {
                                 }
                             </div>
                             <div className="flex-fill rounded" style={ {"backgroundColor": this.state.teams[1].color } }>
-                                    <h1 className="mainTeamNumber">{this.state.sets.length != 0 ? this.state.sets[this.state.sets.length - 1].team_two_points : 0}</h1>
+                                    <h1 className="mainTeamNumber">{this.state.sets.length != 0 ? this.getCurrentSet().team_two_points : 0}</h1>
                             </div>
                             <div className="d-flex flex-row">
                                 <div className="flex-fill pr-1">
