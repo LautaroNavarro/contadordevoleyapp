@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import Layout from '../../components/Layout/Layout';
 import { Link } from 'react-router-dom';
 import './Home.css';
 
@@ -24,7 +23,7 @@ class Home extends Component {
 
     render () {
         return (
-            <Layout>
+            <div>
                 <div className='text-center'>
                     <div className='titleContainer'>
                         <h1 className='mainTitule paddingTop20vh align-bottom'>Contador de voley</h1>
@@ -46,7 +45,7 @@ class Home extends Component {
                         </div>
                     </div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 }

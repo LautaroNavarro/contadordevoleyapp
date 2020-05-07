@@ -4,9 +4,11 @@ from match.views.match_views import (
     SearchMatchView,
     AddPointsView,
     SubPointsView,
+    MatchesView,
 )
 
 urlpatterns = [
+    path('matches/', MatchesView.as_view()),
     path('matches/<int:match_id>', MatchByIdView.as_view()),
     path('matches/<int:match_id>/<str:team>/add', AddPointsView.as_view()),
     path('matches/<int:match_id>/<str:team>/sub', SubPointsView.as_view()),

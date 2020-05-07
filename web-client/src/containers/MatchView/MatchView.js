@@ -6,7 +6,7 @@ import './MatchView.css';
 class MatchView extends Component {
     render (){
         return (
-            <Layout>
+            <div>
                 <div className="text-center">
                     <h2 className="pt-3">San Martin VS Regatas</h2>
                     <h5>
@@ -67,7 +67,7 @@ class MatchView extends Component {
                         </div>
                     </div>
                 </div>
-            </Layout>
+            </div>
         );
     }
 }

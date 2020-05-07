@@ -1,9 +1,11 @@
 import React, { Component } from 'react';
-import Layout from '../../components/Layout/Layout';
-import { Link } from 'react-router-dom';
 import './CreateMatch.css';
+import GeneralContext from './../../components/Context/GeneralContext';
+import axios from 'axios';
 
 class Home extends Component {
+
+    static contextType = GeneralContext;
 
     state = {
         'sets_number': "5",
@@ -20,6 +22,15 @@ class Home extends Component {
                 'color': '#0000ff',
             }
         ]
+    }
+
+    async handleSubmit() {
+        let stateCopy = {...this.state};
+        stateCopy.sets_number = parseInt(stateCopy.sets_number)
+        const response = await axios.post('/api/matches/', stateCopy);
+        sessionStorage.setItem('token', response.data.match.token);
+        const {setRedirect} = this.context;
+        setRedirect(`/matches/${response.data.match.id}`);
     }
 
     handleChangeTeamOneName = (e) => {
@@ -64,7 +75,7 @@ class Home extends Component {
 
     render () {
         return (
-            <Layout>
+            <div>
                 <div className="text-center">
                     <h1 className="pt-3 pb-3">Crear nuevo partido</h1>
                         <form>
@@ -157,11 +168,16 @@ class Home extends Component {
                                 </div>
                             </div>
                         <div className="container">
-                            <Link to="/matches/1" className="btn btn-block btn-dark mb-3">Crear partido</Link>
+                            <div
+                                className="btn btn-block btn-dark mb-3"
+                                onClick={() => {this.handleSubmit()}}
+                            >
+                                Crear partido
+                            </div>
                         </div>
                         </form>
                 </div>
-            </Layout>
+            </div>
         );
     }
 }

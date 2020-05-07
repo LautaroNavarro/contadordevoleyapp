@@ -5,7 +5,9 @@ import json
 from httperrors import BadRequestError
 from match.views.match_actions.create_match_action import CreateMatchAction
 from match.helpers.testing_helpers import get_fake_request
-from match.constants.error_codes import NOT_A_JSON_BODY
+from match.constants.error_codes import (
+    REQUIRED_TO_BE_ODD,
+)
 from match.models.match import Match
 from match.models.team import Team
 from match.models.set import Set
@@ -38,14 +40,12 @@ class TestCreateMatchActionValidate:
         request = get_fake_request(body=json.dumps(schema))
         with pytest.raises(BadRequestError) as e:
             action.validate(request)
-        assert e.value.error_code == NOT_A_JSON_BODY
+        assert e.value.error_code == REQUIRED_TO_BE_ODD
 
     def test_it_does_not_raise_bad_request_when_odd_sets_number(self):
         action = CreateMatchAction()
         request = get_fake_request(body=json.dumps(valid_schema))
-        with pytest.raises(BadRequestError) as e:
-            action.validate(request)
-        assert e.value.error_code == NOT_A_JSON_BODY
+        action.validate(request)
 
 
 @pytest.mark.django_db

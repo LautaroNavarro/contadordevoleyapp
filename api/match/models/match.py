@@ -23,7 +23,7 @@ class Match(models.Model):
     status = models.IntegerField(null=False, db_index=True)
     access_code = models.CharField(max_length=255, null=False, db_index=True)
 
-    token = models.CharField(max_length=255)
+    token = models.CharField(max_length=255, null=False)
 
     # Number of sets to play
     sets_number = models.IntegerField(null=False)
@@ -184,8 +184,28 @@ class Match(models.Model):
     def is_operable_match(self):
         return self.game_status != self.GameStatus.FINISHED.value
 
+    @staticmethod
+    def get_team_one_and_team_two_won_sets(sets):
+        team_one_sets = 0
+        team_two_sets = 0
+        for _set in sets:
+            if _set.game_status == Set.GameStatus.FINISHED.value:
+                if _set.team_one_points > _set.team_two_points:
+                    team_one_sets += 1
+                else:
+                    team_two_sets += 1
+        return team_one_sets, team_two_sets
+
     @property
     def serialized(self):
+        sets_query = self.set_set.all()
+        sets = [_set.serialized for _set in sets_query] if self.id else []
+        teams = [team.serialized for team in Team.objects.filter(match=self)] if self.id else []
+        if teams:
+            team_one_sets, team_two_sets = self.get_team_one_and_team_two_won_sets(sets_query)
+            teams[0]['sets_won'] = team_one_sets
+            teams[1]['sets_won'] = team_two_sets
+
         return {
             'id': self.id,
             'sets_number': self.sets_number,
@@ -195,7 +215,7 @@ class Match(models.Model):
             'set_points_number': self.set_points_number,
             'points_difference': self.points_difference,
             'tie_break_points': self.tie_break_points,
-            'sets': [_set.serialized for _set in self.set_set.all()] if self.id else [],
-            'teams': [team.serialized for team in Team.objects.filter(match=self)] if self.id else [],
+            'sets': sets,
+            'teams': teams,
             'winner_team': self.winner_team.serialized if self.winner_team else None,
         }

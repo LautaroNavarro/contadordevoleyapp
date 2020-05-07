@@ -318,3 +318,36 @@ class TestGameLogic:
         match = MatchFactory(sets_number=5)
         SetFactory(match=match, game_status=Set.GameStatus.PLAYING.value, team_one_points=1)
         assert match.can_substract_points('team_two') is False
+
+    @pytest.mark.django_db
+    def test_get_team_one_and_team_two_won_sets_returns_one_and_cero(self):
+        match = MatchFactory(sets_number=5)
+        SetFinishedTeamOneFactory(match=match)
+        team_one, team_two = match.get_team_one_and_team_two_won_sets(match.set_set.all())
+        assert team_one == 1
+        assert team_two == 0
+
+    @pytest.mark.django_db
+    def test_get_team_one_and_team_two_won_sets_returns_two_and_cero(self):
+        match = MatchFactory(sets_number=5)
+        SetFinishedTeamOneFactory(match=match)
+        SetFinishedTeamOneFactory(match=match)
+        team_one, team_two = match.get_team_one_and_team_two_won_sets(match.set_set.all())
+        assert team_one == 2
+        assert team_two == 0
+
+    @pytest.mark.django_db
+    def test_get_team_one_and_team_two_won_sets_returns_one_and_one(self):
+        match = MatchFactory(sets_number=5)
+        SetFinishedTeamOneFactory(match=match)
+        SetFinishedTeamTwoFactory(match=match)
+        team_one, team_two = match.get_team_one_and_team_two_won_sets(match.set_set.all())
+        assert team_one == 1
+        assert team_two == 1
+
+    @pytest.mark.django_db
+    def test_get_team_one_and_team_two_won_sets_returns_cero_and_cero(self):
+        match = MatchFactory(sets_number=5)
+        team_one, team_two = match.get_team_one_and_team_two_won_sets(match.set_set.all())
+        assert team_one == 0
+        assert team_two == 0
