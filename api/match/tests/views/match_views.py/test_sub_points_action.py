@@ -11,6 +11,7 @@ from match.constants.error_codes import (
     INVALID_TEAM_SELECTION,
     INVALID_MATCH_STATUS,
     INVALID_SET_STATUS,
+    INVALID_TOKEN,
 )
 from match.tests.factories.match_factory import MatchFactory
 from match.tests.factories.set_factory import SetFactory
@@ -22,6 +23,14 @@ from match.models.set import Set
 @pytest.mark.django_db
 class TestSubPointsActionValidate:
 
+    def test_it_raises_bad_request_when_no_token_provided(self):
+        action = SubPointsAction()
+        request = get_fake_request()
+        match = MatchFactory()
+        with pytest.raises(BadRequestError) as e:
+            action.validate(request, match_id=match.id, team='team_one')
+        assert e.value.error_code == INVALID_TOKEN
+
     def test_it_raises_not_found_when_invalid_id(self):
         action = SubPointsAction()
         request = get_fake_request()
@@ -31,32 +40,32 @@ class TestSubPointsActionValidate:
 
     def test_it_raises_invalid_when_invalid_team(self):
         action = SubPointsAction()
-        request = get_fake_request()
         match = MatchFactory()
+        request = get_fake_request(get_params={'token': match.token})
         with pytest.raises(BadRequestError) as e:
             action.validate(request, match_id=match.id, team='no_existing_team')
         assert e.value.error_code == INVALID_TEAM_SELECTION
 
     def test_it_raises_invalid_when_invalid_game_status(self):
         action = SubPointsAction()
-        request = get_fake_request()
         match = MatchFactory(game_status=Match.GameStatus.FINISHED.value)
+        request = get_fake_request(get_params={'token': match.token})
         with pytest.raises(BadRequestError) as e:
             action.validate(request, match_id=match.id, team='team_one')
         assert e.value.error_code == INVALID_MATCH_STATUS
 
     def test_it_raises_invalid_when_no_playing_sets(self):
         action = SubPointsAction()
-        request = get_fake_request()
         match = MatchFactory()
+        request = get_fake_request(get_params={'token': match.token})
         with pytest.raises(BadRequestError) as e:
             action.validate(request, match_id=match.id, team='team_one')
         assert e.value.error_code == INVALID_SET_STATUS
 
     def test_it_does_not_raise_error_when_valid_request(self):
         action = SubPointsAction()
-        request = get_fake_request()
         match = MatchFactory()
+        request = get_fake_request(get_params={'token': match.token})
         SetFactory(match=match, team_one_points=1)
         action.validate(request, match_id=match.id, team='team_one')
 

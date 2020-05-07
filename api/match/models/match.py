@@ -1,5 +1,6 @@
 import string
 import random
+import uuid
 from django.db import models
 from match.helpers.date_helpers import get_current_utc_datetime
 from match.models.team import Team
@@ -22,6 +23,8 @@ class Match(models.Model):
     status = models.IntegerField(null=False, db_index=True)
     access_code = models.CharField(max_length=255, null=False, db_index=True)
 
+    token = models.CharField(max_length=255)
+
     # Number of sets to play
     sets_number = models.IntegerField(null=False)
     game_status = models.IntegerField(null=False)
@@ -36,6 +39,15 @@ class Match(models.Model):
 
     changed = models.DateTimeField(default=get_current_utc_datetime)
     created = models.DateTimeField(default=get_current_utc_datetime)
+
+    @staticmethod
+    def generate_token():
+        return uuid.uuid4().hex
+
+    def set_token(self, token=None):
+        if not token:
+            token = self.generate_token()
+        self.token = token
 
     @property
     def team_one(self):

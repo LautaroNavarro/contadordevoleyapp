@@ -19,6 +19,8 @@ class BaseAction():
 
     common = {}
 
+    validators = []
+
     @json_error_handler
     @request_error_handler
     def __call__(self, request, *args, **kwargs):
@@ -28,6 +30,8 @@ class BaseAction():
     def validate(self, request, *args, **kwargs):
         self.validate_request_content_type(request)
         self.validate_request_schema(request)
+        for validator in self.validators:
+            validator(self, request, *args, **kwargs)
 
     @json_error_to_http_error_mapper
     def validate_request_schema(self, request):

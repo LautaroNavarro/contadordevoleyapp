@@ -34,7 +34,11 @@ class CreateMatchAction(BaseAction):
             self.common['body']['status'] = Match.Status.LIVE.value
             self.common['body']['game_status'] = Match.GameStatus.PLAYING.value
             self.common['body']['access_code'] = Match.generate_access_code()
+            self.common['body']['token'] = Match.generate_token()
+
             match = Match.objects.create(**self.common['body'])
             match.teams.add(*teams)
             match.init_sets()
-        return JsonResponse({'match': match.serialized})
+        match_serialized = match.serialized
+        match_serialized['token'] = match.token  # return token one single time
+        return JsonResponse({'match': match_serialized})

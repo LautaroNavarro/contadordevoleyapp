@@ -19,6 +19,7 @@ from match.constants.error_messages import (
     CAN_NOT_SUBSCRACT_POINTS,
 )
 from match.constants.entities import MATCH
+from match.helpers.validators import validate_token
 
 
 class SubPointsAction(BaseAction):
@@ -29,7 +30,10 @@ class SubPointsAction(BaseAction):
 
     VALID_TEAMS = ['team_one', 'team_two']
 
+    validators = [validate_token]
+
     def validate(self, request, match_id, team, *args, **kwargs):
+        kwargs['match_id'] = match_id
         super().validate(request, *args, **kwargs)
         match = Match.objects.filter(id=match_id).first()
         if not match:

@@ -1,22 +1,17 @@
 from match.views.base.base_action import BaseAction
 from django.http import JsonResponse
-from match.models.match import Match
 from httperrors import (
-    NotFoundError,
     BadRequestError,
-
 )
 from match.constants.error_codes import (
-    INVALID_MATCH_ID,
     INVALID_TEAM_SELECTION,
     INVALID_MATCH_STATUS,
 )
 from match.constants.error_messages import (
-    RESOURCE_NOT_FOUND_MESSAGE,
     TEAM_NOT_ONE_OF,
     MATCH_IS_FINISHED,
 )
-from match.constants.entities import MATCH
+from match.helpers.validators import validate_token
 
 
 class AddPointsAction(BaseAction):
@@ -27,15 +22,12 @@ class AddPointsAction(BaseAction):
 
     VALID_TEAMS = ['team_one', 'team_two']
 
+    validators = [validate_token]
+
     def validate(self, request, match_id, team, *args, **kwargs):
+        kwargs['match_id'] = match_id
         super().validate(request, *args, **kwargs)
-        match = Match.objects.filter(id=match_id).first()
-        if not match:
-            raise NotFoundError(
-                error_message=RESOURCE_NOT_FOUND_MESSAGE.format(MATCH),
-                error_code=INVALID_MATCH_ID,
-            )
-        if not match.is_operable_match():
+        if not self.common['match'].is_operable_match():
             raise BadRequestError(
                 error_message=MATCH_IS_FINISHED,
                 error_code=INVALID_MATCH_STATUS,
@@ -45,9 +37,6 @@ class AddPointsAction(BaseAction):
                 error_message=TEAM_NOT_ONE_OF.format(','.join(self.VALID_TEAMS)),
                 error_code=INVALID_TEAM_SELECTION,
             )
-        self.common = {
-            'match': match
-        }
 
     def run(self, request, match_id, team, *args, **kwargs):
         self.common['match'].add_team_counter(team)

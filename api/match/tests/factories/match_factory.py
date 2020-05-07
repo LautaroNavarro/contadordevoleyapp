@@ -1,7 +1,7 @@
 import factory
 from match.models.match import Match
 from match.helpers.date_helpers import get_current_utc_datetime
-
+import uuid
 
 class MatchFactory(factory.django.DjangoModelFactory):
 
@@ -15,6 +15,7 @@ class MatchFactory(factory.django.DjangoModelFactory):
     set_points_number = 25
     points_difference = 2
     tie_break_points = 15
+    token = uuid.uuid4().hex
 
     created = factory.LazyFunction(get_current_utc_datetime)
     changed = factory.LazyFunction(get_current_utc_datetime)

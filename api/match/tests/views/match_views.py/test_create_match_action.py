@@ -71,6 +71,7 @@ class TestCreateMatchActionRun:
         assert response['match']['set_points_number'] == valid_schema['set_points_number']
         assert response['match']['points_difference'] == valid_schema['points_difference']
         assert response['match']['tie_break_points'] == valid_schema['tie_break_points']
+        assert response['match']['token'] == created_matches[0].token
         assert response['match']['teams'][0]['name'] == valid_schema['teams'][0]['name']
         assert response['match']['teams'][0]['color'] == valid_schema['teams'][0]['color']
         assert response['match']['teams'][1]['name'] == valid_schema['teams'][1]['name']
