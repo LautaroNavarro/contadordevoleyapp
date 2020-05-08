@@ -4,10 +4,14 @@ services:
 env:
   global:
     - SHA=$(git rev-parse HEAD)
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - docker build -t lautaronavarro/contadordevoleyapp-web-client -f ./web-client/Dockerfile.dev ./web-client
   - docker build -t lautaronavarro/contadordevoleyapp-api -f ./api/Dockerfile.travis ./api
+ - curl https://sdk.cloud.google.com | bash > /dev/null
+ - source $HOME/google-cloud-sdk/path.bash.inc
+ - gcloud components install kubectl
 
 script:
   - docker run  -e CI=true lautaronavarro/contadordevoleyapp-web-client npm test

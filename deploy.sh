@@ -1,10 +1,3 @@
-
-apt-get update && sudo apt-get install -y apt-transport-https
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-apt-get update
-apt-get install -y kubectl
-
 docker build -t lautaronavarro/contadordevoleyapp-web-client:latest -t lautaronavarro/contadordevoleyapp-web-client:$SHA -f ./web-client/Dockerfile ./web-client
 docker build -t lautaronavarro/contadordevoleyapp-api:latest -t lautaronavarro/contadordevoleyapp-api:$SHA -f ./api/Dockerfile ./api
 
