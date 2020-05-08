@@ -1,0 +1,20 @@
+sudo: required
+services:
+  - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+before_install:
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t lautaronavarro/contadordevoleyapp-web-client -f ./web-client/Dockerfile.dev ./web-client
+  - docker build -t lautaronavarro/contadordevoleyapp-api -f ./api/Dockerfile.travis ./api
+
+script:
+  - docker run  -e CI=true lautaronavarro/contadordevoleyapp-web-client npm test
+  - docker run lautaronavarro/contadordevoleyapp-api /bin/bash -c "python3 manage.py migrate && pytest"
+
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
