@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
-import Layout from '../../components/Layout/Layout';
 import './MatchControlView.css';
 import GeneralContext from './../../components/Context/GeneralContext';
 import axios from 'axios';
+import PermanentModal from './../../components/Modal/PermanentModal';
+import MatchSummary from './../../components/MatchSummary/MatchSummary';
 
 
 class MatchControlView extends Component {
@@ -35,23 +36,28 @@ class MatchControlView extends Component {
     }
 
     async addPoint(team) {
-        const response = await axios.post(
-            `/api/matches/${this.props.match.params.id}/${team}/add?token=${sessionStorage.getItem('token')}`
-        );
-        this.setState(response.data.match);
+        if (this.state.game_status !== 1) {
+            const response = await axios.post(
+                `/api/matches/${this.props.match.params.id}/${team}/add?token=${sessionStorage.getItem('token')}`
+            );
+            this.setState(response.data.match);
+        }
     }
 
     async subPoint(team) {
-        const response = await axios.post(
-            `/api/matches/${this.props.match.params.id}/${team}/sub?token=${sessionStorage.getItem('token')}`
-        );
-        this.setState(response.data.match);
+        if (this.state.game_status !== 1) {
+            const response = await axios.post(
+                `/api/matches/${this.props.match.params.id}/${team}/sub?token=${sessionStorage.getItem('token')}`
+            );
+            this.setState(response.data.match);
+        }
     }
 
-
     async getMatch() {
-        const response = await axios.get(`/api/matches/${this.props.match.params.id}`);
-        this.setState(response.data.match);
+        if (this.state.game_status !== 1) {
+            const response = await axios.get(`/api/matches/${this.props.match.params.id}`);
+            this.setState(response.data.match);
+        }
     }
 
     componentDidMount () {
@@ -59,14 +65,14 @@ class MatchControlView extends Component {
             const {setRedirect} = this.context;
             setRedirect('/');
         } else {
-            this.getMatch()
+            this.getMatch();
         }
     }
 
     getCurrentSet() {
         for (let i = 0; i < this.state.sets.length; i++) {
             // 0 => PLAYING
-            if (this.state.sets[i].game_status == 0) {
+            if (this.state.sets[i].game_status === 0) {
                 return this.state.sets[i];
             }
         }
@@ -80,14 +86,14 @@ class MatchControlView extends Component {
         for (let i = 0; i < Math.floor(((this.state.sets_number / 2) + 1)); i++) {
             if (renderedWonCount < renderedWon) {
                 render.push(
-                    <div className="flex pr-1">
-                        <div className="rounded-circle bg-dark border border-dark circles"></div>
+                    <div className='flex pr-1' key={`${team}-${i}`}>
+                        <div className='rounded-circle bg-dark border border-dark circles'></div>
                     </div>
                 );
             } else {
                 render.push(
-                    <div className="flex pr-1">
-                        <div className="rounded-circle border border-dark circles"></div>
+                    <div className='flex pr-1' key={`${team}-${i}`}>
+                        <div className='rounded-circle border border-dark circles'></div>
                     </div>
                 );
             }
@@ -99,59 +105,68 @@ class MatchControlView extends Component {
     render (){
         return (
             <div>
-                <div className="text-center">
-                    <h2 className="pt-3">{`${this.state.teams[0].name} VS ${this.state.teams[1].name}`}</h2>
-                    <h5>
-                        {`CODIGO ${this.state.access_code}`}
-                        <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 0 24 24" width="24" className="clickeable">
-                            <path d="M0 0h24v24H0V0z" fill="none"/>
-                            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z"/>
+                {
+                    this.state.winner_team ? <PermanentModal>
+                                                <MatchSummary
+                                                    match={this.state}
+                                                />
+                                            </PermanentModal> : ''
+                }
+                <div className='text-center'>
+                    <h2 className='pt-3 text-dark'>{`${this.state.teams[0].name} VS ${this.state.teams[1].name}`}</h2>
+                    <h5 className='text-dark'>
+                        {`CÓDIGO: ${this.state.access_code}`}
+                        <svg xmlns='http://www.w3.org/2000/svg' height='24' viewBox='0 0 24 24' width='24' className='clickeable'>
+                            <path d='M0 0h24v24H0V0z' fill='none'/>
+                            <path d='M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92zM18 4c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zM6 13c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm12 7.02c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1z'/>
                         </svg>
                     </h5>
-                    <div className="d-flex flex-row m-auto">
-                        <div className="container">
-                            <div className="d-flex flex-row pb-1">
+
+
+                    <div className='d-flex flex-row m-auto'>
+                        <div className='container'>
+                            <div className='d-flex flex-row pb-1'>
                                 {
                                     this.getRenderedSets('team_one')
                                 }
                             </div>
-                            <div className="flex-fill rounded" style={ {"backgroundColor": this.state.teams[0].color } }>
-                                    <h1 className="mainTeamNumber">{this.state.sets.length != 0 ? this.getCurrentSet().team_one_points : 0}</h1>
+                            <div className='flex-fill rounded' style={ {'backgroundColor': this.state.teams[0].color } }>
+                                    <h1 className='mainTeamNumber'>{this.state.sets.length !== 0 && this.getCurrentSet() !== undefined ? this.getCurrentSet().team_one_points : 0}</h1>
                             </div>
-                            <div className="d-flex flex-row">
-                                <div className="flex-fill pr-1">
+                            <div className='d-flex flex-row'>
+                                <div className='flex-fill pr-1'>
                                     <div
-                                        className="btn btn-block btn-secondary"
+                                        className='btn btn-block btn-secondary'
                                         onClick={ () => {this.subPoint('team_one')}}
                                     >-</div>
                                 </div>
-                                <div className="flex-fill pl-1">
+                                <div className='flex-fill pl-1'>
                                     <div
-                                        className="btn btn-block btn-dark"
+                                        className='btn btn-block btn-dark'
                                         onClick={ () => {this.addPoint('team_one')}}
                                     >+</div>
                                 </div>
                             </div>
                         </div>
-                        <div className="container">
-                            <div className="d-flex flex-row pb-1">
+                        <div className='container'>
+                            <div className='d-flex flex-row pb-1'>
                                 {
                                     this.getRenderedSets('team_two')
                                 }
                             </div>
-                            <div className="flex-fill rounded" style={ {"backgroundColor": this.state.teams[1].color } }>
-                                    <h1 className="mainTeamNumber">{this.state.sets.length != 0 ? this.getCurrentSet().team_two_points : 0}</h1>
+                            <div className='flex-fill rounded' style={ {'backgroundColor': this.state.teams[1].color } }>
+                                    <h1 className='mainTeamNumber'>{this.state.sets.length !== 0 && this.getCurrentSet() !== undefined ? this.getCurrentSet().team_two_points : 0}</h1>
                             </div>
-                            <div className="d-flex flex-row">
-                                <div className="flex-fill pr-1">
+                            <div className='d-flex flex-row'>
+                                <div className='flex-fill pr-1'>
                                     <div
-                                        className="btn btn-block btn-secondary"
+                                        className='btn btn-block btn-secondary'
                                         onClick={ () => {this.subPoint('team_two')}}
                                     >-</div>
                                 </div>
-                                <div className="flex-fill pl-1">
+                                <div className='flex-fill pl-1'>
                                     <div
-                                        className="btn btn-block btn-dark"
+                                        className='btn btn-block btn-dark'
                                         onClick={ () => {this.addPoint('team_two')}}
                                     >+</div>
                                 </div>

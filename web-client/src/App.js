@@ -12,10 +12,10 @@ function App() {
     <Router>
         <Layout>
             <div>
-                <Route exact path="/" component={Home} />
-                <Route exact path="/matches/new" component={CreateMatch} />
-                <Route exact path="/matches/:id(\d+)" component={MatchControlView} />
-                <Route exact path="/matches/" component={MatchView} />
+                <Route exact path='/' component={Home} />
+                <Route exact path='/matches/new' component={CreateMatch} />
+                <Route exact path='/matches/:id(\d+)' component={MatchControlView} />
+                <Route exact path='/matches/' component={MatchView} />
             </div>
         </Layout>
     </Router>

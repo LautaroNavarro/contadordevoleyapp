@@ -1,24 +1,29 @@
 import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import './Home.css';
+import GeneralContext from './../../components/Context/GeneralContext';
+
 
 class Home extends Component {
 
+    static contextType = GeneralContext;
+
     state = {
         'displayJoinInput': false,
-        'joinMatchInput': ''
+        'accessCodeInput': ''
     }
 
     handleJoinToMatchClick = (e) => {
-        if (this.state.joinMatchInput === '') {
+        if (this.state.accessCodeInput === '') {
             this.setState({'displayJoinInput': this.state.displayJoinInput === false});
         } else {
-            // TODO REDIRECT TO MATCH VIEW WITH ACCESS CODE
+            const {setRedirect} = this.context;
+            setRedirect(`/matches/?access_code=${this.state.accessCodeInput}`);
         }
     }
 
     handleChangeJoinMatchInput = (e) => {
-        this.setState({'joinMatchInput': e.target.value});
+        this.setState({'accessCodeInput': e.target.value});
     }
 
     render () {
@@ -26,7 +31,10 @@ class Home extends Component {
             <div>
                 <div className='text-center'>
                     <div className='titleContainer'>
-                        <h1 className='mainTitule paddingTop20vh align-bottom'>Contador de voley</h1>
+                        <div className='mainTitule paddingTop20vh align-bottom mb-5'>
+                            <img src='/favicon.png' width='275' height='275' className='d-inline-block align-top mb-4' />
+                            <h1 className="text-dark">Contador de voley</h1>
+                        </div>
                     </div>
                     <div className='w-50 m-auto'>
                         <div className='d-flex flex-column'>
@@ -37,7 +45,7 @@ class Home extends Component {
                                         type='text'
                                         className='form-control mb-3'
                                         placeholder='1ZPOK'
-                                        value={ this.state.joinMatchInput }
+                                        value={ this.state.accessCodeInput }
                                         onChange={ (e) => {this.handleChangeJoinMatchInput(e)} }
                                     /> : ''
                             }

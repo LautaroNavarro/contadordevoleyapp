@@ -201,10 +201,13 @@ class Match(models.Model):
         sets_query = self.set_set.all()
         sets = [_set.serialized for _set in sets_query] if self.id else []
         teams = [team.serialized for team in Team.objects.filter(match=self)] if self.id else []
+        winner_team = self.winner_team.serialized if self.winner_team else None
         if teams:
             team_one_sets, team_two_sets = self.get_team_one_and_team_two_won_sets(sets_query)
             teams[0]['sets_won'] = team_one_sets
             teams[1]['sets_won'] = team_two_sets
+            if winner_team:
+                winner_team['sets_won'] = team_one_sets if teams[0]['id'] == winner_team['id'] else team_two_sets
 
         return {
             'id': self.id,
@@ -217,5 +220,5 @@ class Match(models.Model):
             'tie_break_points': self.tie_break_points,
             'sets': sets,
             'teams': teams,
-            'winner_team': self.winner_team.serialized if self.winner_team else None,
+            'winner_team': winner_team,
         }

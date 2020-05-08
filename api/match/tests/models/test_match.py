@@ -139,10 +139,11 @@ class TestGameLogic:
         teams = [TeamFactory() for i in range(2)]
         match.teams.add(*teams)
         SetFinishedTeamOneFactory(match=match)
-        _set = SetFactory(match=match, team_one_points=25)
+        _set = SetFinishedTeamOneFactory(match=match)
         match.update_game_status()
         assert Set.objects.get(id=_set.id).game_status == Set.GameStatus.FINISHED.value
         assert match.game_status == Match.GameStatus.FINISHED.value
+        assert Set.objects.filter(match=match).count() == 2
 
     @pytest.mark.django_db
     def test_update_game_status_case_two(self):
