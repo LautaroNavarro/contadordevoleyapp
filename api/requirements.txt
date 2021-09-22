@@ -1,5 +1,5 @@
 psycopg2
-Django==3.0.5
+Django==3.1.13
 django-cors-headers>=3.2.0
 httperrors>=1.0.0
 jsonschema>=3.0.0
